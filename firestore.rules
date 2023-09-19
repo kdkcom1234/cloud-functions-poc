@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  function signedInAndOwnedDoc(userId) {
+      return request.auth != null
+          && request.auth.uid == userId;
+  }
+
+  match /databases/{database}/documents {
+    match /todos/{userId}/contents/{documents=**} {
+      allow read: if signedInAndOwnedDoc(userId)
+      allow write : if signedInAndOwnedDoc(userId)
+                      && request.resource.data.memo != ""
+      allow delete : if signedInAndOwnedDoc(userId)
+    }
+  }
+}
